@@ -76,8 +76,42 @@ export default function MainPopup({ onOpenSettings }) {
     // Basic PDF generation placeholder
     // Real PDF generation from LaTeX in browser is hard. 
     // We will offer the .tex file primarily, and maybe a text file as fallback.
-    const handleDownloadPDF = () => {
-        alert("Direct PDF generation from LaTeX in the browser is currently limited. Please download the .tex file and compile it, or use an online LaTeX editor like Overleaf.");
+    const [pdfLoading, setPdfLoading] = useState(false);
+
+    const handleDownloadPDF = async () => {
+        if (!result?.latex) return;
+
+        setPdfLoading(true);
+        try {
+            // Local Docker Backend Endpoint
+            const API_URL = 'http://localhost:1991/generate-pdf';
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ latex: result.latex }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate PDF');
+            }
+
+            const data = await response.json();
+
+            if (data.url) {
+                window.open(data.url, '_blank');
+            } else {
+                throw new Error('No URL returned');
+            }
+
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
+            alert('Error generating PDF. Please try again or download the .tex file.');
+        } finally {
+            setPdfLoading(false);
+        }
     };
 
     return (
@@ -145,9 +179,11 @@ export default function MainPopup({ onOpenSettings }) {
                         </button>
                         <button
                             onClick={handleDownloadPDF}
-                            className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex justify-center items-center text-sm"
+                            disabled={pdfLoading}
+                            className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex justify-center items-center text-sm disabled:opacity-50"
                         >
-                            <Download size={16} className="mr-2" /> Download PDF
+                            {pdfLoading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Download size={16} className="mr-2" />}
+                            {pdfLoading ? 'Generating...' : 'Download PDF'}
                         </button>
                     </div>
 

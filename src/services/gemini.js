@@ -1,6 +1,6 @@
 import { storage } from './storage';
 
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent';
 
 export const gemini = {
     async optimizeCV(jobDescription, resumeLatex, resumeName) {
