@@ -1,0 +1,34 @@
+{
+    "manifest_version": 3,
+    "name": "My Resume AI",
+    "version": "1.0.0",
+    "description": "Optimize your CV with Gemini based on Job Descriptions",
+    "permissions": [
+        "storage",
+        "contextMenus",
+        "activeTab",
+        "scripting"
+    ],
+    "background": {
+        "service_worker": "src/background/index.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "src/content/index.js"
+            ]
+        }
+    ],
+    "action": {
+        "default_popup": "index.html"
+    },
+    "icons": {
+        "16": "public/vite.svg",
+        "48": "public/vite.svg",
+        "128": "public/vite.svg"
+    }
+}
