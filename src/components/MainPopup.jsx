@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { storage } from '../services/storage';
 import { gemini } from '../services/gemini';
-import { Settings as SettingsIcon, Loader2, Download, FileText } from 'lucide-react';
+import { Settings as SettingsIcon, Loader2, Download, FileText, Menu } from 'lucide-react';
+import Sidebar from './Sidebar';
 
 export default function MainPopup({ onOpenSettings, onClose }) {
     const [jobDescription, setJobDescription] = useState('');
@@ -9,6 +10,7 @@ export default function MainPopup({ onOpenSettings, onClose }) {
     const [selectedCvId, setSelectedCvId] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null); // { latex, summary }
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -47,9 +49,10 @@ export default function MainPopup({ onOpenSettings, onClose }) {
 
             // Save history
             await storage.saveHistory({
-                jobDescription: jobDescription.substring(0, 100) + '...',
+                jobDescription: jobDescription, // Save full description
                 originalCvName: selectedCv.name,
                 summary: response.summary,
+                latex: response.latex, // Save latex for restoration
                 timestamp: Date.now()
             });
 
@@ -114,10 +117,40 @@ export default function MainPopup({ onOpenSettings, onClose }) {
         }
     };
 
+    const handleSelectHistory = (item) => {
+        setJobDescription(item.jobDescription || '');
+        // If the item has a result (latex/summary), show it
+        if (item.latex && item.summary) {
+            setResult({
+                latex: item.latex,
+                summary: item.summary
+            });
+        } else {
+            // If old history item without full data, just show what we have or warn
+            // For now, let's just set what we can. 
+            // If no latex, we can't show the result view fully as it expects latex for download.
+            // But we can show the summary.
+            if (item.summary) {
+                setResult({
+                    latex: item.latex || '', // Might be empty for old items
+                    summary: item.summary
+                });
+            }
+        }
+        setIsSidebarOpen(false);
+    };
+
     return (
         <div className="p-6 w-full max-w-md mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 mt-4">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+                    <button
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                        title="History"
+                    >
+                        <Menu size={24} />
+                    </button>
                     My Resume AI
                 </h1>
                 <div className="flex gap-2">
@@ -216,6 +249,11 @@ export default function MainPopup({ onOpenSettings, onClose }) {
                     </button>
                 </div>
             )}
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                onSelectHistory={handleSelectHistory}
+            />
         </div>
     );
 }

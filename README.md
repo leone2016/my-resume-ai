@@ -25,7 +25,7 @@ Captura la información de las vacantes de tres formas sencillas:
 ### 5. Configuración y Privacidad
 - **Tu llave, tus datos:** Configura tu propia API Key de Gemini.
 - **Almacenamiento Local:** Tus CVs y configuraciones se guardan en `localStorage`, manteniendo tus datos en tu dispositivo.
-- **Historial:** (En desarrollo) Mantén un registro de las ofertas a las que has aplicado.
+- **Historial de Optimizaciones:** Accede a un registro completo de tus optimizaciones anteriores a través del menú lateral. Podrás ver el resumen de cambios, recuperar la descripción del trabajo original y descargar nuevamente los resultados (LaTeX/PDF).
 
 ## 🛠️ Tecnologías Utilizadas
 
