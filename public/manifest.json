@@ -25,10 +25,10 @@
     ],
     "action": {
         "default_popup": "index.html"
-    },
-    "icons": {
-        "16": "public/vite.svg",
-        "48": "public/vite.svg",
-        "128": "public/vite.svg"
     }
+    // "icons": {
+    //     "16": "public/vite.svg",
+    //     "48": "public/vite.svg",
+    //     "128": "public/vite.svg"
+    // }
 }

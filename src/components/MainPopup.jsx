@@ -3,7 +3,7 @@ import { storage } from '../services/storage';
 import { gemini } from '../services/gemini';
 import { Settings as SettingsIcon, Loader2, Download, FileText } from 'lucide-react';
 
-export default function MainPopup({ onOpenSettings }) {
+export default function MainPopup({ onOpenSettings, onClose }) {
     const [jobDescription, setJobDescription] = useState('');
     const [cvs, setCvs] = useState([]);
     const [selectedCvId, setSelectedCvId] = useState('');
@@ -115,72 +115,93 @@ export default function MainPopup({ onOpenSettings }) {
     };
 
     return (
-        <div className="p-4 w-full max-w-md mx-auto">
-            <div className="flex justify-between items-center mb-4">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <div className="p-6 w-full max-w-md mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 mt-4">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     My Resume AI
                 </h1>
-                <button onClick={onOpenSettings} className="p-2 hover:bg-gray-100 rounded-full">
-                    <SettingsIcon size={20} />
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={onOpenSettings}
+                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
+                        title="Settings"
+                    >
+                        <SettingsIcon size={20} />
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors duration-200"
+                        title="Close"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
             </div>
 
             {!result ? (
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Job Description</label>
+                <div className="space-y-5">
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Job Description</label>
                         <textarea
                             value={jobDescription}
                             onChange={(e) => setJobDescription(e.target.value)}
-                            className="w-full p-2 border rounded h-32 text-sm"
-                            placeholder="Paste job description here or select text on a page..."
+                            className="w-full p-3 border border-gray-200 rounded-lg h-32 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none bg-gray-50 hover:bg-white"
+                            placeholder="Paste job description here..."
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Select Resume</label>
-                        <select
-                            value={selectedCvId}
-                            onChange={(e) => setSelectedCvId(e.target.value)}
-                            className="w-full p-2 border rounded text-sm"
-                        >
-                            {cvs.map(cv => (
-                                <option key={cv.id} value={cv.id}>{cv.name}</option>
-                            ))}
-                        </select>
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Select Resume</label>
+                        <div className="relative">
+                            <select
+                                value={selectedCvId}
+                                onChange={(e) => setSelectedCvId(e.target.value)}
+                                className="w-full p-3 border border-gray-200 rounded-lg text-sm appearance-none bg-gray-50 hover:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all cursor-pointer"
+                            >
+                                {cvs.map(cv => (
+                                    <option key={cv.id} value={cv.id}>{cv.name}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+                                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+                            </div>
+                        </div>
                         {cvs.length === 0 && (
-                            <p className="text-xs text-red-500 mt-1">Please add a resume in settings first.</p>
+                            <p className="text-xs text-red-500 mt-1 font-medium">Please add a resume in settings first.</p>
                         )}
                     </div>
 
                     <button
                         onClick={handleOptimize}
                         disabled={loading || !jobDescription || cvs.length === 0}
-                        className="w-full py-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 disabled:opacity-50 flex justify-center items-center"
+                        className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center"
                     >
                         {loading ? <Loader2 className="animate-spin mr-2" /> : 'Optimize Resume'}
                     </button>
                 </div>
             ) : (
-                <div className="space-y-4">
-                    <div className="bg-green-50 p-4 rounded border border-green-200">
-                        <h3 className="font-semibold text-green-800 mb-2">Optimization Complete!</h3>
-                        <div className="text-sm text-gray-700 whitespace-pre-wrap max-h-40 overflow-y-auto">
+                <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200 shadow-sm">
+                        <h3 className="font-semibold text-green-800 mb-2 flex items-center">
+                            <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                            Optimization Complete!
+                        </h3>
+                        <div className="text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto custom-scrollbar">
                             {result.summary}
                         </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                         <button
                             onClick={handleDownloadLatex}
-                            className="flex-1 py-2 border border-gray-300 rounded hover:bg-gray-50 flex justify-center items-center text-sm"
+                            className="flex-1 py-2.5 border border-gray-200 bg-white text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-300 font-medium transition-all flex justify-center items-center text-sm shadow-sm"
                         >
-                            <FileText size={16} className="mr-2" /> Download .tex
+                            <FileText size={16} className="mr-2 text-gray-500" /> Download .tex
                         </button>
                         <button
                             onClick={handleDownloadPDF}
                             disabled={pdfLoading}
-                            className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex justify-center items-center text-sm disabled:opacity-50"
+                            className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium transition-all flex justify-center items-center text-sm shadow-md disabled:opacity-70"
                         >
                             {pdfLoading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Download size={16} className="mr-2" />}
                             {pdfLoading ? 'Generating...' : 'Download PDF'}
@@ -189,7 +210,7 @@ export default function MainPopup({ onOpenSettings }) {
 
                     <button
                         onClick={() => setResult(null)}
-                        className="w-full text-sm text-gray-500 hover:text-gray-700"
+                        className="w-full py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors"
                     >
                         Start Over
                     </button>
