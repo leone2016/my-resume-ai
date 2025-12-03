@@ -43,7 +43,7 @@ export default function Settings({ onBack }) {
     };
 
     return (
-        <div className="p-4 w-full max-w-md mx-auto">
+        <div className="p-4  min-h-[400px] w-full max-w-md mx-auto">
             <div className="flex items-center mb-4">
                 <button onClick={onBack} className="mr-2 p-1 hover:bg-gray-100 rounded">
                     <ArrowLeft size={20} />

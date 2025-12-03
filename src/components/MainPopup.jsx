@@ -126,7 +126,6 @@ export default function MainPopup({ onOpenSettings, onClose }) {
     };
 
     const handleSelectHistory = (item) => {
-        debugger;
         setJobDescription(item.jobDescription || '');
         // If the item has a result (latex/summary), show it
         if (item.latex && item.summary) {
@@ -250,7 +249,7 @@ export default function MainPopup({ onOpenSettings, onClose }) {
                             className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium transition-all flex justify-center items-center text-sm shadow-md disabled:opacity-70"
                         >
                             {pdfLoading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Download size={16} className="mr-2" />}
-                            {pdfLoading ? 'Generating...' : 'Download PDF'}
+                            {pdfLoading ? 'Generating...' : 'Download PDF ..'}
                         </button>
                     </div>
 
