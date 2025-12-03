@@ -44,6 +44,13 @@ export default function MainPopup({ onOpenSettings, onClose }) {
         setResult(null);
 
         try {
+            // Get current tab URL
+            let currentUrl = '';
+            if (typeof chrome !== 'undefined' && chrome.tabs) {
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                currentUrl = tab?.url || '';
+            }
+
             const response = await gemini.optimizeCV(jobDescription, selectedCv.content, selectedCv.name);
             setResult(response);
 
@@ -53,7 +60,8 @@ export default function MainPopup({ onOpenSettings, onClose }) {
                 originalCvName: selectedCv.name,
                 summary: response.summary,
                 latex: response.latex, // Save latex for restoration
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                url: currentUrl // Save the URL
             });
 
         } catch (error) {
@@ -118,6 +126,7 @@ export default function MainPopup({ onOpenSettings, onClose }) {
     };
 
     const handleSelectHistory = (item) => {
+        debugger;
         setJobDescription(item.jobDescription || '');
         // If the item has a result (latex/summary), show it
         if (item.latex && item.summary) {
@@ -213,7 +222,11 @@ export default function MainPopup({ onOpenSettings, onClose }) {
                     </button>
                 </div>
             ) : (
+
                 <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                        {jobDescription || 'No description'}
+                    </p>
                     <div className="bg-green-50 p-4 rounded-lg border border-green-200 shadow-sm">
                         <h3 className="font-semibold text-green-800 mb-2 flex items-center">
                             <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>

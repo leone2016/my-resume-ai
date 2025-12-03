@@ -26,6 +26,14 @@ export default function Sidebar({ isOpen, onClose, onSelectHistory }) {
         });
     };
 
+    const getDomain = (url) => {
+        try {
+            return new URL(url).hostname.replace('www.', '');
+        } catch {
+            return '';
+        }
+    };
+
     return (
         <>
             {/* Overlay */}
@@ -66,10 +74,17 @@ export default function Sidebar({ isOpen, onClose, onSelectHistory }) {
                                     className="group p-3 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50 cursor-pointer transition-all shadow-sm hover:shadow-md"
                                 >
                                     <div className="flex justify-between items-start mb-1">
-                                        <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
-                                            {item.originalCvName || 'Unknown CV'}
-                                        </span>
-                                        <span className="text-[10px] text-gray-400">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full w-fit mb-1">
+                                                {item.originalCvName || 'Unknown CV'}
+                                            </span>
+                                            {item.url && (
+                                                <span className="text-[10px] text-gray-500 font-medium truncate max-w-[150px]">
+                                                    {getDomain(item.url)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
                                             {formatDate(item.timestamp || item.date)}
                                         </span>
                                     </div>
