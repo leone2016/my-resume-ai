@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.17",
+    "@tailwindcss/typography": "^0.5.19",
     "lucide-react": "^0.555.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

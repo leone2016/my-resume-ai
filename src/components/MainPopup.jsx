@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { storage } from '../services/storage';
 import { gemini } from '../services/gemini';
 import { Settings as SettingsIcon, Loader2, Download, FileText, Menu } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import Sidebar from './Sidebar';
 
 export default function MainPopup({ onOpenSettings, onClose }) {
@@ -231,8 +232,10 @@ export default function MainPopup({ onOpenSettings, onClose }) {
                             <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                             Optimization Complete!
                         </h3>
-                        <div className="text-sm text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto custom-scrollbar">
-                            {result.summary}
+                        <div className="text-sm text-gray-700 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                            <ReactMarkdown className="prose prose-sm prose-green max-w-none">
+                                {result.summary}
+                            </ReactMarkdown>
                         </div>
                     </div>
 
@@ -249,7 +252,7 @@ export default function MainPopup({ onOpenSettings, onClose }) {
                             className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium transition-all flex justify-center items-center text-sm shadow-md disabled:opacity-70"
                         >
                             {pdfLoading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Download size={16} className="mr-2" />}
-                            {pdfLoading ? 'Generating...' : 'Download PDF ..'}
+                            {pdfLoading ? 'Generating...' : 'Download PDF'}
                         </button>
                     </div>
 
