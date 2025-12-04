@@ -3,59 +3,21 @@ import { storage } from './storage';
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent';
 
 export const gemini = {
-    async optimizeCV(jobDescription, resumeLatex, resumeName) {
+    async optimizeCV(jobDescription, resumeLatex, resumeName, promptTemplate) {
         const apiKey = await storage.getApiKey();
         if (!apiKey) {
             throw new Error('API Key not found. Please configure it in settings.');
         }
 
-        const prompt = `
-Actúa como un asesor experto en sistemas ATS (Applicant Tracking System), 
-especializado en la plataforma LinkedIn Recruiter y en optimizar hojas de vida 
-para maximizar coincidencias con ofertas laborales.
+        // Use provided template or fallback (though caller should provide it)
+        if (!promptTemplate) {
+            throw new Error('Prompt template is required.');
+        }
 
-REGLAS DE COMPORTAMIENTO:
-1. Tu tarea es analizar una oferta laboral y un currículum en formato LaTeX.  
-2. Debes identificar palabras clave, habilidades, competencias, herramientas y 
-   responsabilidades mencionadas en la oferta.
-3. Debes modificar el CV en LaTeX para incluir los keywords relevantes de manera 
-   natural, coherente y profesional, sin alterar la estructura original y sin 
-   inventar logros falsos.
-4. El resultado debe mantener un formato LaTeX válido y compilable.
-5. Siempre responde con:
-   A) Un CV actualizado **en LaTeX completo y limpio**.
-   B) Un resumen claro y conciso de los cambios realizados.
-6. No generes PDF; solo retorna el LaTeX. El plug-in se encargará del PDF.
-7. Si encuentras incoherencias, faltantes o inconsistencias entre la oferta y el CV,
-   corrígelas de manera profesional.
-
-DATOS PARA ANALIZAR:
----------------------
-OFERTA LABORAL (Job Description):
-${jobDescription}
-
-CURRÍCULUM ORIGINAL (LaTeX):
-${resumeLatex}
-
-IDENTIFICADOR DEL RESUME:
-${resumeName}
-
-OBJETIVO DE LA RESPUESTA:
--------------------------
-Tu respuesta debe incluir exclusivamente:
-
-=== SECCIÓN 1: CV ACTUALIZADO EN LATEX ===
-(Entrega el documento completo, listo para compilar. NO uses bloques de código markdown, solo el texto plano del latex si es posible, o asegúrate de que sea fácil de extraer)
-
-=== SECCIÓN 2: RESUMEN DE ACTUALIZACIONES ===
-Indica:
-- Palabras clave añadidas
-- Secciones modificadas
-- Justificación breve de cada cambio
-- Relevancia ATS
-
-FIN DEL PROMPT.
-`;
+        const prompt = promptTemplate
+            .replace('${jobDescription}', jobDescription)
+            .replace('${resumeLatex}', resumeLatex)
+            .replace('${resumeName}', resumeName);
 
         try {
             const response = await fetch(`${API_URL}?key=${apiKey}`, {
@@ -89,12 +51,23 @@ FIN DEL PROMPT.
 
     parseResponse(text) {
         // Simple parsing logic to separate LaTeX and Summary
-        // This assumes the model follows the prompt structure
-        const latexMarker = "=== SECCIÓN 1: CV ACTUALIZADO EN LATEX ===";
-        const summaryMarker = "=== SECCIÓN 2: RESUMEN DE ACTUALIZACIONES ===";
+        // Supports both Spanish (original) and English (new default) markers
+        const markers = {
+            latex: ["=== SECCIÓN 1: CV ACTUALIZADO EN LATEX ===", "=== SECTION 1: UPDATED CV IN LATEX ==="],
+            summary: ["=== SECCIÓN 2: RESUMEN DE ACTUALIZACIONES ===", "=== SECTION 2: SUMMARY OF UPDATES ==="]
+        };
 
-        const latexStartIndex = text.indexOf(latexMarker);
-        const summaryStartIndex = text.indexOf(summaryMarker);
+        let latexMarker = markers.latex.find(m => text.includes(m));
+        let summaryMarker = markers.summary.find(m => text.includes(m));
+
+        // If markers not found, try to guess or fail gracefully
+        if (!latexMarker || !summaryMarker) {
+            // Fallback: try to find just "SECTION 1" or "SECCIÓN 1" if full marker fails
+            // For now, let's stick to strict markers to avoid bad parsing
+        }
+
+        const latexStartIndex = latexMarker ? text.indexOf(latexMarker) : -1;
+        const summaryStartIndex = summaryMarker ? text.indexOf(summaryMarker) : -1;
 
         let latex = "";
         let summary = "";

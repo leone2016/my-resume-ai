@@ -9,6 +9,8 @@ export default function MainPopup({ onOpenSettings, onClose }) {
     const [jobDescription, setJobDescription] = useState('');
     const [cvs, setCvs] = useState([]);
     const [selectedCvId, setSelectedCvId] = useState('');
+    const [prompts, setPrompts] = useState([]);
+    const [selectedPromptId, setSelectedPromptId] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null); // { latex, summary }
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -23,6 +25,16 @@ export default function MainPopup({ onOpenSettings, onClose }) {
         setCvs(savedCvs);
         if (savedCvs.length > 0) {
             setSelectedCvId(savedCvs[0].id);
+        }
+
+        const savedPrompts = await storage.getPrompts();
+        setPrompts(savedPrompts);
+
+        const savedSelectedPromptId = await storage.getSelectedPromptId();
+        if (savedSelectedPromptId && savedPrompts.find(p => p.id === savedSelectedPromptId)) {
+            setSelectedPromptId(savedSelectedPromptId);
+        } else if (savedPrompts.length > 0) {
+            setSelectedPromptId(savedPrompts[0].id);
         }
     };
 
@@ -52,7 +64,10 @@ export default function MainPopup({ onOpenSettings, onClose }) {
                 currentUrl = tab?.url || '';
             }
 
-            const response = await gemini.optimizeCV(jobDescription, selectedCv.content, selectedCv.name);
+            const selectedPrompt = prompts.find(p => p.id === selectedPromptId);
+            const promptContent = selectedPrompt ? selectedPrompt.content : null;
+
+            const response = await gemini.optimizeCV(jobDescription, selectedCv.content, selectedCv.name, promptContent);
             setResult(response);
 
             // Save history
@@ -152,10 +167,10 @@ export default function MainPopup({ onOpenSettings, onClose }) {
     return (
         <div className="p-6 w-full max-w-md mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 mt-4">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+                <h1 className="text-2xl font-bold  accent-blue-600 flex items-center gap-3">
                     <button
                         onClick={() => setIsSidebarOpen(true)}
-                        className="p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                        className="p-1 text-gray-500 transition-colors duration-200"
                         title="History"
                     >
                         <Menu size={24} />
@@ -165,7 +180,7 @@ export default function MainPopup({ onOpenSettings, onClose }) {
                 <div className="flex gap-2">
                     <button
                         onClick={onOpenSettings}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200"
+                        className="p-2 text-gray-500  transition-colors duration-200"
                         title="Settings"
                     >
                         <SettingsIcon size={20} />
@@ -182,6 +197,28 @@ export default function MainPopup({ onOpenSettings, onClose }) {
 
             {!result ? (
                 <div className="space-y-5">
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">Select Prompt</label>
+                        <div className="relative">
+                            <select
+                                value={selectedPromptId}
+                                onChange={async (e) => {
+                                    const newId = e.target.value;
+                                    setSelectedPromptId(newId);
+                                    await storage.setSelectedPromptId(newId);
+                                }}
+                                className="w-full p-3 border border-gray-200 rounded-lg text-sm appearance-none bg-gray-50 hover:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all cursor-pointer"
+                            >
+                                {prompts.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+                                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="space-y-2">
                         <label className="block text-sm font-semibold text-gray-700">Job Description</label>
                         <textarea
@@ -216,7 +253,7 @@ export default function MainPopup({ onOpenSettings, onClose }) {
                     <button
                         onClick={handleOptimize}
                         disabled={loading || !jobDescription || cvs.length === 0}
-                        className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center"
+                        className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-600 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center"
                     >
                         {loading ? <Loader2 className="animate-spin mr-2" /> : 'Optimize Resume'}
                     </button>

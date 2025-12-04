@@ -7,6 +7,9 @@ export default function Settings({ onBack }) {
     const [cvs, setCvs] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [currentCv, setCurrentCv] = useState({ name: '', content: '' });
+    const [prompts, setPrompts] = useState([]);
+    const [isEditingPrompt, setIsEditingPrompt] = useState(false);
+    const [currentPrompt, setCurrentPrompt] = useState({ name: '', content: '' });
 
     useEffect(() => {
         loadSettings();
@@ -17,6 +20,8 @@ export default function Settings({ onBack }) {
         setApiKey(key || '');
         const savedCvs = await storage.getCVs();
         setCvs(savedCvs);
+        const savedPrompts = await storage.getPrompts();
+        setPrompts(savedPrompts);
     };
 
     const handleSaveApiKey = async () => {
@@ -40,6 +45,29 @@ export default function Settings({ onBack }) {
             await storage.deleteCV(id);
             loadSettings();
         }
+    };
+
+    const handleSavePrompt = async () => {
+        if (!currentPrompt.name || !currentPrompt.content) {
+            alert('Please fill in both name and content');
+            return;
+        }
+        await storage.savePrompt(currentPrompt);
+        setIsEditingPrompt(false);
+        setCurrentPrompt({ name: '', content: '' });
+        loadSettings();
+    };
+
+    const handleDeletePrompt = async (id) => {
+        if (confirm('Are you sure you want to delete this Prompt?')) {
+            await storage.deletePrompt(id);
+            loadSettings();
+        }
+    };
+
+    const handleEditPrompt = (prompt) => {
+        setCurrentPrompt(prompt);
+        setIsEditingPrompt(true);
     };
 
     return (
@@ -127,6 +155,75 @@ export default function Settings({ onBack }) {
                     ))}
                     {cvs.length === 0 && !isEditing && (
                         <p className="text-gray-500 text-sm text-center py-4">No resumes saved yet.</p>
+                    )}
+                </div>
+            </div>
+
+            <div className="mb-4 border-t pt-4">
+                <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold">My Prompts</h3>
+                    <button
+                        onClick={() => {
+                            setCurrentPrompt({ name: '', content: '' });
+                            setIsEditingPrompt(true);
+                        }}
+                        className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                    >
+                        <Plus size={16} className="mr-1" /> Add New
+                    </button>
+                </div>
+
+                {isEditingPrompt && (
+                    <div className="mb-4 p-3 border rounded bg-gray-50">
+                        <input
+                            type="text"
+                            value={currentPrompt.name}
+                            onChange={(e) => setCurrentPrompt({ ...currentPrompt, name: e.target.value })}
+                            className="w-full p-2 mb-2 border rounded text-sm"
+                            placeholder="Prompt Name (e.g., Default English)"
+                        />
+                        <textarea
+                            value={currentPrompt.content}
+                            onChange={(e) => setCurrentPrompt({ ...currentPrompt, content: e.target.value })}
+                            className="w-full p-2 mb-2 border rounded text-sm font-mono h-48"
+                            placeholder="Paste Prompt content here..."
+                        />
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => setIsEditingPrompt(false)}
+                                className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-200 rounded"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSavePrompt}
+                                className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                <div className="space-y-2">
+                    {prompts.map((prompt) => (
+                        <div key={prompt.id} className="flex justify-between items-center p-2 border rounded hover:bg-gray-50">
+                            <span
+                                className="font-medium cursor-pointer flex-1"
+                                onClick={() => handleEditPrompt(prompt)}
+                            >
+                                {prompt.name}
+                            </span>
+                            <button
+                                onClick={() => handleDeletePrompt(prompt.id)}
+                                className="text-red-500 hover:text-red-700 p-1"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                    ))}
+                    {prompts.length === 0 && !isEditingPrompt && (
+                        <p className="text-gray-500 text-sm text-center py-4">No prompts saved yet.</p>
                     )}
                 </div>
             </div>

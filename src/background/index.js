@@ -4,7 +4,7 @@ console.log('Background script loaded');
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "send-to-cv-ai",
-        title: "Send to CV AI",
+        title: "Send to my resume AI",
         contexts: ["selection"]
     });
 });

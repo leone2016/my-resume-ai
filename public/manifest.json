@@ -24,11 +24,14 @@
         }
     ],
     "action": {
-        "default_popup": "index.html"
-    }
-    // "icons": {
-    //     "16": "public/vite.svg",
-    //     "48": "public/vite.svg",
-    //     "128": "public/vite.svg"
-    // }
+        "default_popup": "index.html",
+        "default_icon": {
+            "16": "my-resume-ai.png",
+            "32": "my-resume-ai.png"
+        }    },
+     "icons": {
+         "16": "my-resume-ai.png",
+         "48": "my-resume-ai.png",
+         "128": "my-resume-ai.png"
+     }
 }
