@@ -16,7 +16,7 @@ WORKDIR /app
 
 # Install libstdc++ which might be needed by tectonic (even static builds sometimes need basic libs)
 # Since we are using the musl binary, alpine is correct.
-RUN apk add --no-cache libstdc++ fontconfig
+RUN apk add --no-cache libstdc++ fontconfig pandoc
 
 # Copy built node app
 COPY --from=builder /app/dist ./dist
@@ -26,6 +26,7 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy Tectonic binary
 # We use the Linux binary for the Docker image
 COPY tectonic/bin/tectonic /usr/local/bin/tectonic
+COPY template.docx /app/template.docx
 RUN chmod +x /usr/local/bin/tectonic
 
 # Create temp directory for PDF generation
