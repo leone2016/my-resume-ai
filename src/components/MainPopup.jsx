@@ -142,25 +142,14 @@ export default function MainPopup({ onOpenSettings, onClose }) {
     };
 
     const handleSelectHistory = (item) => {
+        debugger;
         setJobDescription(item.jobDescription || '');
         // If the item has a result (latex/summary), show it
-        if (item.latex && item.summary) {
-            setResult({
-                latex: item.latex,
-                summary: item.summary
-            });
-        } else {
-            // If old history item without full data, just show what we have or warn
-            // For now, let's just set what we can. 
-            // If no latex, we can't show the result view fully as it expects latex for download.
-            // But we can show the summary.
-            if (item.summary) {
-                setResult({
-                    latex: item.latex || '', // Might be empty for old items
-                    summary: item.summary
-                });
-            }
-        }
+         setResult({
+            latex: item.latex || '', // Might be empty for old items
+            url: item.url || '',
+            summary: item.summary
+          });
         setIsSidebarOpen(false);
     };
 
@@ -262,15 +251,18 @@ export default function MainPopup({ onOpenSettings, onClose }) {
 
                 <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-300">
                     <p className="text-xs text-gray-600 line-clamp-2 mb-2">
-                        {jobDescription || 'No description'}
+                        {`${jobDescription} ` || 'No description'} 
                     </p>
+                    {result.url !== '' && <a href={result.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 line-clamp-2 mb-2">
+                        url job offer
+                    </a>}
                     <div className="bg-green-50 p-4 rounded-lg border border-green-200 shadow-sm">
                         <h3 className="font-semibold text-green-800 mb-2 flex items-center">
                             <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                             Optimization Complete!
                         </h3>
                         <div className="text-sm text-gray-700 max-h-60 overflow-y-auto custom-scrollbar pr-2">
-                            <ReactMarkdown className="prose prose-sm prose-green max-w-none">
+                            <ReactMarkdown >
                                 {result.summary}
                             </ReactMarkdown>
                         </div>
